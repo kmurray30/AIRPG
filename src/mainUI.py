@@ -16,17 +16,12 @@ from concurrent.futures import Future
 
 import simpleaudio as sa
 
-filename = os.path.splitext(os.path.basename(__file__))[0]
-if __name__ == "__main__" or __name__ == filename: # If the script is being run directly
-    from Utilities.Utilities import get_path_from_project_root
-else: # If the script is being imported
-    from .Utilities.Utilities import get_path_from_project_root
+from Utilities.Utilities import get_path_from_project_root
 
 DEBUG = FALSE
 
 # GUI
 root = Tk()
-root.title("Chatbot")
 
 BG_GRAY = "#ABB2B9"
 BG_BLACK = "#000000"
