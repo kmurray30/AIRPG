@@ -71,7 +71,7 @@ class View(tk.Tk):
 
     # Set up the UI with the presenter bindings
     def create_ui(self, presenter: Presenter) -> None:
-        self.send_button.config(command=presenter.on_button_click)
+        self.send_button.config(command=presenter.on_send)
     
     # Start the main event loop
     def mainloop(self) -> None:

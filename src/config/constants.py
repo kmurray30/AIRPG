@@ -1,6 +1,9 @@
 
 # Color namer: https://chir.ag/projects/name-that-color/
 
+class audio_files:
+    TITLE = "assets/Title-14.wav"
+
 class colors:
     GRAY_CHATEAU = "#ABB2B9"
     BLACK = "#000000"

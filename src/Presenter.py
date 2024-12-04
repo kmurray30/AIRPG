@@ -2,6 +2,7 @@ from typing import Protocol
 import time
 import traceback
 from utils.file_utils import format_path_from_root
+from config.constants import audio_files
 
 import simpleaudio as sa
 import concurrent.futures
@@ -24,6 +25,7 @@ class Presenter:
     # Run the presenter which handles all logic before running the main event loop
     def run(self) -> None:
         self.view.create_ui(self)
+        self.view.protocol("WM_DELETE_WINDOW", self.on_exit)  # Bind the cleanup function to the window close event
         self.initial_screen()
         self.view.mainloop()
 
@@ -33,7 +35,7 @@ class Presenter:
         # Play the title screen music using simpleaudio and file assets/Title-14.wav
         self.executor.submit(
             self.play_audio_on_loop,
-                format_path_from_root("assets/Title-14.wav"),
+                format_path_from_root(audio_files.TITLE),
                 cancel_token=self.cancel_audio_token)
 
     def play_audio_file(self, file_path, cancel_token):
@@ -68,8 +70,10 @@ class Presenter:
     
     def on_send(self) -> None:
         print("Send button clicked!")
+        self.cancel_audio_token["value"] = True
 
     def on_exit(self) -> None:
         print("Exiting the application")
-        self.cancel_audio_token["value"] = True
-        # self.executor.shutdown(wait=False)
+        sa.stop_all() # Cancel token will also work but this is cleaner
+        self.executor.shutdown(wait=False)
+        self.view.quit()
