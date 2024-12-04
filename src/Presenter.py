@@ -55,7 +55,6 @@ class Presenter:
                     print(f"Stopping audio {file_name}")
                     play_obj.stop()
                     break
-                time.sleep(1)
         except Exception as e:
             print(f"An error occurred while playing the audio")
             traceback.print_exc()
@@ -67,10 +66,8 @@ class Presenter:
             print(f"Looping audio {i}")
             self.play_audio_file(file_path, cancel_token)
     
-    def on_button_click(self) -> None:
-        print("Button clicked!")
-        self.cancel_audio_token["value"] = True
-        print(f"Cancel audio token set to: {self.cancel_audio_token}")
+    def on_send(self) -> None:
+        print("Send button clicked!")
 
     def on_exit(self) -> None:
         print("Exiting the application")
