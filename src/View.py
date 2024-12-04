@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Frame, Text, Entry, Button, DISABLED, WORD, Label
+from tkinter import Frame, Text, Entry, Button, DISABLED, WORD, Label, NORMAL, END
 from PIL import Image, ImageTk
 from typing import Protocol
 
@@ -25,6 +25,9 @@ class View(tk.Tk):
     label: tk.Label
     send_button: tk.Button
 
+    # Define the widgets
+    txt: Text
+
     # Initialize the view
     def __init__(self) -> None:
 
@@ -47,17 +50,17 @@ class View(tk.Tk):
 
         # Create image widget
         title_screen_path = format_path_from_root("assets/title_screen.png")
-        image_widget = create_image_widget(self, title_screen_path)
+        image_widget = self.create_image_widget(self, title_screen_path)
         image_widget.grid(row=0, column=1, sticky="W")
 
         # Create Main Chat Area
-        txt = Text(chat_frame, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, width=60, wrap=WORD)
-        txt.grid(row=0, column=0, columnspan=2, sticky='NSWE')
+        self.txt = Text(chat_frame, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, width=60, wrap=WORD)
+        self.txt.grid(row=0, column=0, columnspan=2, sticky='NSWE')
 
         # Set chat window settings
-        txt.tag_config("You", foreground="green") # Set the user text color
-        txt.tag_config("DungeonMaster", foreground="white") # Set the ChatGPT text color
-        txt.config(state=DISABLED) # Disable the chat window for typing
+        self.txt.tag_config("You", foreground="green") # Set the user text color
+        self.txt.tag_config("DungeonMaster", foreground="white") # Set the ChatGPT text color
+        self.txt.config(state=DISABLED) # Disable the chat window for typing
 
         # Create the text input field
         e = Entry(chat_frame, bg="#2C3E50", fg=TEXT_COLOR, font=FONT)
@@ -77,12 +80,16 @@ class View(tk.Tk):
     def mainloop(self) -> None:
         # Call mainloop of the parent class TK
         super().mainloop()
+    
+    def add_text_to_chat_window(self, text, role):
+        self.txt.config(state=NORMAL)
+        self.txt.insert(END, role + " -> " + text + "\n\n\n\n", role)
+        self.txt.config(state=DISABLED)
 
-def create_image_widget(root, file_path):
-    img = Image.open(file_path)
-    photo = ImageTk.PhotoImage(img)
-    image_widget = Label(root, image=photo)
-    image_widget.image = photo
-    image_widget.original = img
-
-    return image_widget
+    def create_image_widget(self, root, file_path):
+        img = Image.open(file_path)
+        photo = ImageTk.PhotoImage(img)
+        image_widget = Label(root, image=photo)
+        image_widget.image = photo
+        image_widget.original = img
+        return image_widget

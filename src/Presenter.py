@@ -46,11 +46,16 @@ class Presenter:
                 format_path_from_root(audio_files.TITLE),
                 cancel_token=self.cancel_music_token)
         
+        intro = "Welcome to the epic adventure that awaits you in Chat RPG. From mystical forests to ancient, bustling cities, explore an infinitely unfolding world shaped by your actions and decisions. With deep and complex NPCs, beautifully generated art, and epic narration, an exciting journey awaits you, if you are ready. Your adventure begins in an unassuming tavern."
+
         # Play the initial narration
         self.executor.submit(
             self.play_audio_file,
                 format_path_from_root(audio_files.INTRO_NARRATION),
                 cancel_token=self.cancel_narration_token, delay=2)
+
+        # Display the response
+        self.view.add_text_to_chat_window(intro, "DungeonMaster")
 
     def play_audio_file(self, file_path, cancel_token, delay=0):
         try:

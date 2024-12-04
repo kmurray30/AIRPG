@@ -6,7 +6,7 @@ class ChatSession:
         self.messages = [
         {
             "role": "system",
-            "content": """
-            You are a table top role playing game dungeon master. Please always limit your responses to a few sentences.
+            "content": f"""
+            {system_prompt}
             """}
-    ]
+        ]
