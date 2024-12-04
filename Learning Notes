@@ -1,0 +1,12 @@
+Learning Notes
+
+"React is the VVM of MVVM"
+"Don't really have MVVM in python". Bc of this, and my app is just one view, I should just stick to using MVP for my python demo
+MVC just means the actions come through the controller and go into the view. The view controls both the view and the logic, which is lame. MVP is a better bifurcation of view vs logic
+
+
+TODO:
+	Finish MVVM tutorial (https://www.youtube.com/watch?v=eHhXoCNCI1c&t=198s)
+
+	Start porting my UI to at least visually match
+	Start porting the logic

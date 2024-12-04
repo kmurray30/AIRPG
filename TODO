@@ -1,0 +1,80 @@
+TODO
+
+- Figure out why copilot chat window is not showing up - on the right side now (via top button)
+- Make the image prompt metadata at the top and pass in the variable strings when invoked (ie the prompt)
+UTs
+Skip initial narration
+	Fix the modularity so that skipping the intro looks better
+	Don't cancel the background music when skipping
+throw an error when calling openai
+Put a try catch around everything
+Recreate the repo to post date ms
+organize the temp output to make reproduceable scenes
+remove text from images
+Make the initial narration from a premade file rather than calling the API each time (and move to asset folder)
+Be able to plop into different worlds than just 
+	Have it scrub any trademarked stuff from the image generation
+
+Refactoring
+	Make the speech logic more modular
+		I think I call different functions for summary and intro than I do for everything else
+		The "skip" button logic was duplicated for this as well
+	Get rid of the utility classes
+	Probably isolate the
+	Better method names
+	Create classes for methods?
+
+Steps:
+1	Copy and paste repo with new name
+2	github
+3	Start rebuilding from scratch
+
+Design
+	Isolate the UI to one class, have it call different classes
+		MVP?
+
+Audio
+	playsound only uses wav which might run into issues with generating AI audio quickly
+	pydub is blocking and can't easily be stopped without spinning up a whole separate process
+	pygame requires you to use pygame for UI
+	PyAudio
+	playsound
+
+Music gen
+	Udio
+
+Notes:
+	The first time, you directly call submit_prompt_and_narrate_task
+	Every other time, the send button calls send_prompt_task, which generates the summary and then calls submit_prompt_and_narrate_task
+	I should instead just call the same thing but put "intro" to false? nah bc there's other stuff
+	A jankier way is to just make the intro special and skippable in spant
+
+11/29 Notes:
+	I need to figure out a way to set up my audio system
+	Currently I spin up a thread and pass in a cancel token. This requires an extra thread that is running until cancelled, which is kind of wasteful
+	I could have one class instance for all audio, or I could have instance per audio being played
+	NTS: Apparently all instance methods need to include "self" as the first parameter
+TODO
+	print stacktrace of exception
+
+Competitors:
+	Character AI
+	Online AI RPG games
+
+Research:
+	AI
+		Attention is all you need
+		Find more papers
+	AI tech
+		VDBs
+		Fine tuning
+		Learn more
+
+World ideas:
+	my voodoo game idea
+	pokemon but for real animals
+	IP
+		titanic
+		pokemon
+		DND
+		Harry Potter

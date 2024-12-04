@@ -1,5 +1,5 @@
-from View import View
-from Presenter import Presenter
+from view import View
+from presenter import Presenter
 
 def main() -> None:
     # model = Model()

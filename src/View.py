@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 from typing import Protocol
 
 from config.constants import colors, fonts
-from utils.file_utils import get_abs_path_at_runtime
+from utils.file_utils import format_path_from_root
 
 # Constants
 BG_GRAY = colors.GRAY_CHATEAU
@@ -17,34 +17,37 @@ FONT_BOLD = fonts.HELVETICA_13_BOLD
 class Presenter(Protocol):
     ...
 
-class View:
+# Make View a subclass of Tkinter's Tk class
+class View(tk.Tk):
 
     # Define the fields of this class
     root: tk.Tk
     label: tk.Label
-    button: tk.Button
+    send_button: tk.Button
 
     # Initialize the view
     def __init__(self) -> None:
 
+        # Initialize the parent class
+        super().__init__()
+
         # Root config
-        self.root = tk.Tk()
-        self.root.grid_rowconfigure(0, weight=1)  # Allocate extra space to row 0
-        self.root.grid_columnconfigure(0, weight=1)  # Allocate extra space to column 0
-        self.root.grid_columnconfigure(1, weight=1)  # Allocate extra space to column 1
-        self.root.minsize(500, 500)
-        self.root.config(bg=BG_BLACK)
-        self.root.attributes('-fullscreen', True)
+        self.grid_rowconfigure(0, weight=1)  # Allocate extra space to row 0
+        self.grid_columnconfigure(0, weight=1)  # Allocate extra space to column 0
+        self.grid_columnconfigure(1, weight=1)  # Allocate extra space to column 1
+        self.minsize(500, 500)
+        self.config(bg=BG_BLACK)
+        self.attributes('-fullscreen', True)
 
         # Create a Frame
-        chat_frame = Frame(self.root)
+        chat_frame = Frame(self)
         chat_frame.grid(row=0, column=0, sticky='NWSE', columnspan=1, rowspan=1)  # Add the Frame to the root window and make it stick to the left
         chat_frame.grid_rowconfigure(0, weight=1)  # Allocate extra space to row 0
         chat_frame.grid_columnconfigure(0, weight=1)  # Allocate extra space to column 0
 
         # Create image widget
-        title_screen_path = get_abs_path_at_runtime("assets/title_screen.png")
-        image_widget = create_image_widget(self.root, title_screen_path)
+        title_screen_path = format_path_from_root("assets/title_screen.png")
+        image_widget = create_image_widget(self, title_screen_path)
         image_widget.grid(row=0, column=1, sticky="W")
 
         # Create Main Chat Area
@@ -63,18 +66,17 @@ class View:
         e.config(state=DISABLED) # Will be enabled after the ChatGPT response
 
         # Create a send button
-        send_button = Button(chat_frame, text="Send", font=FONT_BOLD, bg=BG_GRAY)
-        send_button.grid(row=1, column=1, sticky='WS', padx=0)
-        send_button.config(state=DISABLED) # Disabled until the user is allowed to type something
+        self.send_button = Button(chat_frame, text="Send", font=FONT_BOLD, bg=BG_GRAY)
+        self.send_button.grid(row=1, column=1, sticky='WS', padx=0)
 
     # Set up the UI with the presenter bindings
     def create_ui(self, presenter: Presenter) -> None:
-        ...
-        # self.button.config(command=presenter.on_button_click)
+        self.send_button.config(command=presenter.on_button_click)
     
     # Start the main event loop
     def mainloop(self) -> None:
-        self.root.mainloop()
+        # Call mainloop of the parent class TK
+        super().mainloop()
 
 def create_image_widget(root, file_path):
     img = Image.open(file_path)
