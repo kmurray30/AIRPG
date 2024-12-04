@@ -3,6 +3,7 @@
 
 class audio_files:
     TITLE = "assets/Title-14.wav"
+    INTRO_NARRATION = "assets/intro_narration.wav"
 
 class colors:
     GRAY_CHATEAU = "#ABB2B9"
