@@ -22,10 +22,10 @@ class View(tk.Tk):
 
     # Define the fields of this class
     root: tk.Tk
-    label: tk.Label
-    send_button: tk.Button
 
     # Define the widgets
+    label: tk.Label
+    send_button: tk.Button
     txt: Text
 
     # Initialize the view
@@ -80,11 +80,6 @@ class View(tk.Tk):
     def mainloop(self) -> None:
         # Call mainloop of the parent class TK
         super().mainloop()
-    
-    def add_text_to_chat_window(self, text, role):
-        self.txt.config(state=NORMAL)
-        self.txt.insert(END, role + " -> " + text + "\n\n\n\n", role)
-        self.txt.config(state=DISABLED)
 
     def create_image_widget(self, root, file_path):
         img = Image.open(file_path)
@@ -93,3 +88,14 @@ class View(tk.Tk):
         image_widget.image = photo
         image_widget.original = img
         return image_widget
+    
+    def add_text_to_chat_window(self, text, role):
+        self.txt.config(state=NORMAL)
+        self.txt.insert(END, role + " -> " + text + "\n\n\n\n", role)
+        self.txt.config(state=DISABLED)
+    
+    def switch_send_button_to_skip(self, skip_command):
+        print("DEBUG: setting send button to Skip")
+        self.send_button.config(state=NORMAL)
+        self.send_button.config(text="Skip")
+        self.send_button.config(command=skip_command)

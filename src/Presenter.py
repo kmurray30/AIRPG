@@ -57,6 +57,9 @@ class Presenter:
         # Display the response
         self.view.add_text_to_chat_window(intro, "DungeonMaster")
 
+        # Switch the send button to the skip button
+        self.view.switch_send_button_to_skip(self.on_skip)
+
     def play_audio_file(self, file_path, cancel_token, delay=0):
         try:
             time.sleep(delay)
@@ -93,6 +96,9 @@ class Presenter:
     
     def on_send(self) -> None:
         print("Send button clicked!")
+
+    def on_skip(self) -> None:
+        print("Skip button clicked!")
         self.cancel_narration_token["value"] = True
 
     def on_exit(self) -> None:
