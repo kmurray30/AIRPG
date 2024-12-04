@@ -56,6 +56,15 @@ Notes:
 	NTS: Apparently all instance methods need to include "self" as the first parameter
 TODO
 	print stacktrace of exception
+12/3 Notes:
+TODO
+	fix segfault
+		why is it working in original but not this?
+		it was the evil simpleaudio issue... it requires python 11 not 12
+	Get cancel token working
+	App can exit when clicking X
+	Create a logger class with debug levels
+	original app I don't think switches the button function back from skip
 
 Competitors:
 	Character AI

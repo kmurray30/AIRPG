@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import Tk, Frame, Text, Entry, Button, DISABLED, WORD, END, NORMAL, DISABLED
 from tkinter import Label
 import os
 import concurrent.futures
@@ -18,7 +18,7 @@ import simpleaudio as sa
 
 from Utilities.Utilities import get_path_from_project_root
 
-DEBUG = FALSE
+DEBUG = False
 
 # GUI
 root = Tk()
