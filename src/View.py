@@ -27,6 +27,7 @@ class View(tk.Tk):
     label: tk.Label
     send_button: tk.Button
     txt: Text
+    image_widget: Label
 
     # Initialize the view
     def __init__(self) -> None:
@@ -84,10 +85,17 @@ class View(tk.Tk):
     def create_image_widget(self, root, file_path):
         img = Image.open(file_path)
         photo = ImageTk.PhotoImage(img)
-        image_widget = Label(root, image=photo)
-        image_widget.image = photo
-        image_widget.original = img
-        return image_widget
+        self.image_widget = Label(root, image=photo)
+        self.image_widget.image = photo
+        self.image_widget.original = img
+        return self.image_widget
+    
+    def update_image_widget(self, file_path):
+        img = Image.open(file_path)
+        photo = ImageTk.PhotoImage(img)
+        self.image_widget.config(image=photo)
+        self.image_widget.image = photo
+        self.image_widget.original = img
     
     def add_text_to_chat_window(self, text, role):
         self.txt.config(state=NORMAL)

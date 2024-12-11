@@ -65,6 +65,20 @@ TODO
 	App can exit when clicking X
 	Create a logger class with debug levels
 	original app I don't think switches the button function back from skip
+12/11 Notes:
+	Design
+		Initial
+			Take in generated image and audio
+			Play them
+			Set button to skip
+		Button
+			Take user prompt
+			Generate image and audio
+			Wait
+			While waiting play the vamping audio
+			Once generated and vamping is done, call the
+
+
 
 Competitors:
 	Character AI

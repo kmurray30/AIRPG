@@ -4,6 +4,7 @@ import traceback
 from utils.file_utils import format_path_from_root
 from config.constants import audio_files
 from chat_session import ChatSession
+from scene import Scene
 
 import simpleaudio as sa
 import concurrent.futures
@@ -29,8 +30,50 @@ class Presenter:
         self.view.create_ui(self)
         self.view.protocol("WM_DELETE_WINDOW", self.on_exit)  # Bind the cleanup function to the window close event
         self.initialize_chat_session()
-        self.initial_screen()
+        initial_scene = self.generate_initial_scene()
+        self.play_scene(initial_scene)
         self.view.mainloop()
+
+    # Generate the initial scene audio and image
+    # Returns a Scene object containing the audio and image paths and the chatGPT response
+    def generate_initial_scene(self) -> Scene:
+        # Set the paths of the initial audio and image and call play_scene
+        chatGPT_response = "Welcome to the epic adventure that awaits you in Chat RPG. From mystical forests to ancient, bustling cities, explore an infinitely unfolding world shaped by your actions and decisions. With deep and complex NPCs, beautifully generated art, and epic narration, an exciting journey awaits you, if you are ready. Your adventure begins in an unassuming tavern."
+        music_path = format_path_from_root(audio_files.TITLE)
+        narration_path = format_path_from_root(audio_files.INTRO_NARRATION)
+        image_path = format_path_from_root("assets/title_screen.png")
+        return Scene(chatGPT_response, music_path, narration_path, image_path)
+
+    def generate_scene(self, user_input: str) -> None:
+        # 1. Take the user prompt as a parameter
+        # 2. Start generating vamping audio
+        # 3. Start generating the DM response
+        # 4. Await the DM response
+        # 5. Start generating the image description from the DM response
+        # 6. Start generating the DM response audio
+        # 7. Play the vamping audio
+        # 8. Await the image and DM response audio generation
+        # 9. Play the image and DM response audio by calling play_scene
+        ...
+
+    def play_scene(self, scene: Scene) -> None:
+        # At this point, last image and audio are generated and waiting to be played
+        # From here, we will do the following:
+        # 1. Play the input audio
+        # 2. Display the input image
+        # 3. Display the response text in the chat window
+        # 4. Switch the send button to the skip button
+        
+        # Play the initial audio and display the initial image
+        self.view.update_image_widget(scene.get_image_path())
+        self.executor.submit(self.play_audio_file, scene.get_music_path(), self.cancel_music_token)
+        self.executor.submit(self.play_audio_file, scene.get_narration_path(), self.cancel_narration_token, delay=2)
+
+        # Display the response
+        self.view.add_text_to_chat_window(scene.get_chatGPT_response(), "DungeonMaster")
+
+        # Switch the send button to the skip button
+        self.view.switch_send_button_to_skip(self.on_skip)
 
     def initialize_chat_session(self) -> None:
         print("Initializing chat session")
@@ -80,6 +123,7 @@ class Presenter:
                 if (cancel_token["value"] == True):
                     print(f"Stopping audio {file_name}")
                     play_obj.stop()
+                    cancel_token["value"] = False
                     break
         except Exception as e:
             print(f"An error occurred while playing the audio")
@@ -100,6 +144,10 @@ class Presenter:
     def on_skip(self) -> None:
         print("Skip button clicked!")
         self.cancel_narration_token["value"] = True
+
+        # Set the send button back to the original state
+        self.view.send_button.config(command=self.on_send)
+        self.view.send_button.config(text="Send")
 
     def on_exit(self) -> None:
         print("Exiting the application")
