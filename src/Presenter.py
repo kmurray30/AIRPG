@@ -11,7 +11,7 @@ import simpleaudio as sa
 from concurrent import futures
 
 # Prompts and messages
-dm_system_prompt = "You are a table top role playing game dungeon master. Please always limit your responses to a few sentences."
+dm_system_prompt = "You are a table top role playing game dungeon master. Please always limit your responses to a few sentences. Do not include text in the image."
 title_narration = "Welcome to the epic adventure that awaits you in Chat RPG. From mystical forests to ancient, bustling cities, explore an infinitely unfolding world shaped by your actions and decisions. With deep and complex NPCs, beautifully generated art, and epic narration, an exciting journey awaits you, if you are ready. Your adventure begins in an unassuming tavern."
 initial_scene_prompt = "Set up an initial scene in a medieval tavern."
 vamp_prompt = "Repeat back my following proposed actions to me in a sassy way and in a few short words, and then ask me to hang tight while the scene is generated"
@@ -52,10 +52,10 @@ class Presenter:
 
         # Generate and play the title screen
         title_scene = self.generate_title_scene()
-        self.play_scene(title_scene, initial_scene=True)
+        self.play_scene(title_scene, title_scene=True)
 
         # Generate and play the initial scene in a separate thread
-        self.executor.submit(self.generate_initial_scene)
+        self.executor.submit(self.generate_and_play_initial_scene)
         
         # Start the main event loop
         self.view.mainloop()
@@ -70,41 +70,37 @@ class Presenter:
         image_path = format_path_from_root(image_files.TITLE_SCREEN)
         return Scene(chatGPT_response, music_path, narration_path, image_path)
     
-    def generate_initial_scene(self) -> Scene:
+    def generate_and_play_initial_scene(self) -> Scene:
         intial_scene = self.generate_scene(initial_scene_prompt, vamp=False)
         self.narration_finished_event.wait() # Wait for title scene to finish before playing the initial scene
         if (self.event_toggle is False):
             self.event_toggle = True
         else:
             self.narration_finished_event.clear()
-        self.cancel_music_token["value"] = True
+        self.cancel_music_token["value"] = True # Stop the title music
         self.play_scene(intial_scene, initial_scene=True)
 
-    def generate_scene(self, prompt, vamp=True) -> Scene:
+    def generate_scene(self, user_input, vamp=True) -> Scene:
+        # Generate the vamping audio and play it if vamp is set
+        if (vamp):
+            self.vamping_finished_event.clear()
+            self.executor.submit(self.vamp_thread, user_input)
+        
         # Await the DM response
-        chatGPT_response = self.chat_session.append_user_input_and_get_response(prompt)
+        chatGPT_response = self.chat_session.append_user_input_and_get_response(user_input)
         
         # Start generating the image
         image_future = self.chat_session.generate_image(chatGPT_response)
         
         # Start generating the DM response audio
         narration_future = self.chat_session.generate_narration(chatGPT_response)
-        
-        # Generate the vamping audio and play it if vamp is set
-        if (vamp):
-            vamp_response = self.chat_session.generate_vamp_response(chatGPT_response, vamp_prompt)
-            vamp_audio_future = self.chat_session.generate_narration(vamp_response)
-        
-            # Wait for and play the vamping audio
-            futures.wait([vamp_audio_future])
-            vamp_audio_path = vamp_audio_future.result()
-            self.executor.submit(self.play_audio_file, vamp_audio_path, self.cancel_narration_token, self.vamping_finished_event)
-
-            # Wait for the vamping audio to finish playing
-            self.vamping_finished_event.wait()
 
         # Await the image and DM response audio generation
         futures.wait([image_future, narration_future])
+
+        # Wait for the vamping audio to finish playing
+        if(vamp):
+            self.vamping_finished_event.wait()
 
         # Return the scene object
         return Scene(chatGPT_response,
@@ -112,16 +108,28 @@ class Presenter:
                      narration_future.result(),
                      image_future.result(),
                      sfx = audio_files.CHATTER)
+    
+    def vamp_thread(self, user_input):
+        # Generate the vamping response and audio
+        vamp_response = self.chat_session.generate_vamp_response(user_input, vamp_prompt)
+        vamp_audio_future = self.chat_session.generate_narration(vamp_response)
+    
+        # Wait for and play the vamping audio
+        futures.wait([vamp_audio_future])
+        vamp_audio_path = vamp_audio_future.result()
+        self.play_audio_file(vamp_audio_path, self.cancel_narration_token, self.vamping_finished_event)
 
     # Play the scene by displaying the image, playing the music, and playing the narration
-    def play_scene(self, scene: Scene, initial_scene = False) -> None:        
+    def play_scene(self, scene: Scene, initial_scene = False, title_scene = False) -> None:        
         # Play the initial audios and display the initial image (and text)
         self.view.update_image_widget(scene.get_image_path())
         self.executor.submit(self.play_audio_file, scene.get_narration_path(), self.cancel_narration_token, self.narration_finished_event, delay=2)
-        if (initial_scene): # TODO replace this with a state machine
+        if (title_scene): # TODO replace this with a state machine / more elegant solution
             self.executor.submit(self.play_audio_file, scene.get_music_path(), self.cancel_music_token)
+        elif (initial_scene):
+            self.executor.submit(self.play_audio_on_loop, scene.get_music_path(), self.cancel_music_token)
             if (scene.has_sfx()):
-                self.executor.submit(self.play_audio_file, scene.get_sfx_path(), self.cancel_sfx_token)
+                self.executor.submit(self.play_audio_on_loop, scene.get_sfx_path(), self.cancel_sfx_token)
         self.view.display_chat_message("DungeonMaster", scene.get_chatGPT_response())
 
         # Switch the send button to the skip button TODO pass in the cancel narration token so it doesn't have to be a class field
@@ -181,15 +189,15 @@ class Presenter:
             traceback.print_exc()
             raise(e)
 
-    def play_audio_on_loop(self, file_path, cancel_token):
+    def play_audio_on_loop(self, file_path, cancel_token, audio_finished_event = None):
         i = 1
         file_name = file_path.split("/")[-1]
         while cancel_token["value"] == False:
-            self.play_audio_file(file_path, cancel_token)
-            i += 1
             print(f"Starting loop {i} on audio {file_name}")
+            self.play_audio_file(file_path, cancel_token, audio_finished_event)
+            i += 1
     
-    def on_send(self) -> None:
+    def on_send(self, event=None) -> None:
         print("Send button clicked!")
         # Fetch the user prompt as a parameter
         user_input = self.view.drain_text()

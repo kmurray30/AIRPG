@@ -85,6 +85,7 @@ class View(tk.Tk):
         self.send_function = presenter.on_send
         self.skip_function = presenter.on_skip
         self.send_button.config(command=presenter.on_initial_skip)
+        self.txt_input_field.bind("<Return>", self.send_function)
     
     # Start the main event loop
     def mainloop(self) -> None:

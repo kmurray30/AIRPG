@@ -100,8 +100,8 @@ class ChatSession:
         self.chat_messages.append({"role": "assistant", "content": response})
         return response
     
-    def generate_vamp_response(self, user_input: str, prompt: str) -> str:
-        input = f"{prompt}: {user_input}"
+    def generate_vamp_response(self, user_input: str, vamp_prompt: str) -> str:
+        input = f"{vamp_prompt}: {user_input}"
         self.chat_messages.append({"role": "user", "content": input})
         response = self._call_openai_chat(self.chat_messages)
         self.chat_messages.pop() # Don't persist the prompt
