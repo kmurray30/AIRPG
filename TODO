@@ -87,7 +87,9 @@ TODO
 		Create an event listener for when the audio stops playing or is skipped, for the initial scene to not start until audio is done playing, and subsequent scenes to unlock the send and text field once audio is done playing.
 12/12 Notes:
 	DEBUG
-		It is using the vamping as the response somehow
+		Ooh this is because of the race condition of vamp and gpt being on different threads
+			It is using the vamping as the response somehow
+			It somehow didn't include the system prompt in the gpt call, and keeps the vamping sometimes...
 		the narration started taking forever...
 		X restarts the audio loop now
 	TODO
@@ -104,12 +106,14 @@ TODO
 		null checks everywhere
 		organize
 		audio manager class? for state machine and tokens etc
-		handle inappropriate content flags from chatgpt
+		***handle inappropriate content flags from chatgpt
 		handle case if skip button being pressed before narration starts
 		***DEBUG mode to pass in fake images and narration
+		*Make the different gpt chat calls more thread safe
 		logger
 		infinite context window
 		always snap the chat window to the most recent texts
+		timeouts / indicators of how long each thing is taking
 		TODOs in code
 
 Competitors:

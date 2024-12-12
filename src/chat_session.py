@@ -41,14 +41,14 @@ class ChatSession:
 
     # Function to call the OpenAI API
     def _call_openai_chat(self, messages):
-        completion = self.open_ai_client.chat.completions.create(
+        response = self.open_ai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             # model="gpt-4-turbo-preview",
             # model="gpt-4-0125-preview",
             messages=messages
         )
-        response = completion.choices[0].message.content
-        return response
+        chat_response = response.choices[0].message.content
+        return chat_response
 
     def _call_openai_image(self, prompt):
         try:
@@ -95,9 +95,10 @@ class ChatSession:
 
     def append_user_input_and_get_response(self, user_input: str) -> str:
         self.chat_messages.append({"role": "user", "content": user_input})
-        chat_messages_with_system_prompt = self._prepend_system_prompt(self.dm_system_prompt)
-        response = self._call_openai_chat(chat_messages_with_system_prompt)
+        self._prepend_system_prompt(self.dm_system_prompt)
+        response = self._call_openai_chat(self.chat_messages)
         self.chat_messages.append({"role": "assistant", "content": response})
+        self.chat_messages.pop(0) # Don't persist the system prompt
         return response
     
     def generate_vamp_response(self, user_input: str, vamp_prompt: str) -> str:
