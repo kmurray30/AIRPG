@@ -94,7 +94,7 @@ TODO
 		X restarts the audio loop now
 	TODO
 		-
-		handle empty input
+		-handle empty input
 		*try catches everywhere
 		return function (idk what I meant by this when I wrote it...)
 		**make view not protocol
@@ -106,7 +106,7 @@ TODO
 		null checks everywhere
 		organize
 		audio manager class? for state machine and tokens etc
-		***handle inappropriate content flags from chatgpt
+		~handle inappropriate content flags from chatgpt
 		handle case if skip button being pressed before narration starts
 		***DEBUG mode to pass in fake images and narration
 		*Make the different gpt chat calls more thread safe

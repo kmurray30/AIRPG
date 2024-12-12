@@ -24,6 +24,9 @@ class ChatSession:
     # Image prompt
     image_prompt = f"Generate the following scene in the a {art_styles.STUDIO_GHIBLI} style, making sure to include a character that looks like aragorn from The Lord of the Rings, and don't include any text: "
 
+    # Custom GPT error response
+    custom_gpt_error_response = "Something went wrong while generating the response"
+
     # Executor
     executor: ThreadPoolExecutor
 
@@ -35,19 +38,20 @@ class ChatSession:
         self.chat_messages = []
         self.executor = executor
 
-    def _prepend_system_prompt(self, system_prompt) -> list:
-        self.chat_messages.insert(0, {"role": "system", "content": system_prompt})
-        return self.chat_messages
-
     # Function to call the OpenAI API
     def _call_openai_chat(self, messages):
-        response = self.open_ai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            # model="gpt-4-turbo-preview",
-            # model="gpt-4-0125-preview",
-            messages=messages
-        )
-        chat_response = response.choices[0].message.content
+        try:
+            response = self.open_ai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                # model="gpt-4-turbo-preview",
+                # model="gpt-4-0125-preview",
+                messages=messages
+            )
+            chat_response = response.choices[0].message.content
+        except Exception as e:
+            print(f"An error occurred while calling the OpenAI chat API")
+            traceback.print_exc()
+            chat_response = self.custom_gpt_error_response
         return chat_response
 
     def _call_openai_image(self, prompt):
@@ -80,6 +84,7 @@ class ChatSession:
         ) as response:
             if response.status_code != 200:
                 print(f"Failed to convert the text to speech. Status code: {response.status_code}")
+                raise Exception("Failed to convert the text to speech")
                 return
             print(f"response for audio file {file_path}: {response}")
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -93,30 +98,39 @@ class ChatSession:
         ]
         return self._call_openai_chat(chatGptMessages)
 
+    # TODO make these more thread safe (can set up a buffer or smth)
     def append_user_input_and_get_response(self, user_input: str) -> str:
-        self.chat_messages.append({"role": "user", "content": user_input})
-        self._prepend_system_prompt(self.dm_system_prompt)
-        response = self._call_openai_chat(self.chat_messages)
-        self.chat_messages.append({"role": "assistant", "content": response})
-        self.chat_messages.pop(0) # Don't persist the system prompt
+        # Create a deep copy of the chat messages to avoid race conditions
+        chat_messages = self.chat_messages.copy()
+        chat_messages.append({"role": "user", "content": user_input})
+        chat_messages.insert(0, {"role": "system", "content": self.dm_system_prompt})
+        response = self._call_openai_chat(chat_messages)
+        chat_messages.append({"role": "assistant", "content": response})
+        chat_messages.pop(0) # Don't persist the system prompt
+        self.chat_messages = chat_messages # Update the chat messages
         return response
     
     def generate_vamp_response(self, user_input: str, vamp_prompt: str) -> str:
+        chat_messages = self.chat_messages.copy()
         input = f"{vamp_prompt}: {user_input}"
-        self.chat_messages.append({"role": "user", "content": input})
-        response = self._call_openai_chat(self.chat_messages)
-        self.chat_messages.pop() # Don't persist the prompt
+        chat_messages.append({"role": "user", "content": input})
+        response = self._call_openai_chat(chat_messages)
         return response
     
     # Generate image
     def generate_image(self, gtp_scene_description) -> str:
         # Generate the image from the scene description (non-blocking)
-        if flags.DEBUG:
+        if flags.DEBUG or self.custom_gpt_error_response in gtp_scene_description: # TODO replace this
             image_path_future = Future()
             image_path_future.set_result(format_path_from_root("assets/sample_tavern_art.png"))
         else:
             prompt = self.image_prompt + gtp_scene_description
             image_path_future = self.executor.submit(self._call_openai_image, prompt)
+            if image_path_future.exception():
+                print(f"An error occurred while generating the image")
+                print(f"Returning a placeholder image")
+                image_path_future = Future()
+                image_path_future.set_result(format_path_from_root("assets/sample_tavern_art.png"))
         return image_path_future
     
     def generate_narration(self, gtp_scene_description) -> Future[str]:

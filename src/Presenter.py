@@ -81,33 +81,38 @@ class Presenter:
         self.play_scene(intial_scene, initial_scene=True)
 
     def generate_scene(self, user_input, vamp=True) -> Scene:
-        # Generate the vamping audio and play it if vamp is set
-        if (vamp):
-            self.vamping_finished_event.clear()
-            self.executor.submit(self.vamp_thread, user_input)
-        
-        # Await the DM response
-        chatGPT_response = self.chat_session.append_user_input_and_get_response(user_input)
-        
-        # Start generating the image
-        image_future = self.chat_session.generate_image(chatGPT_response)
-        
-        # Start generating the DM response audio
-        narration_future = self.chat_session.generate_narration(chatGPT_response)
+        try:
+            # Generate the vamping audio and play it if vamp is set
+            if (vamp):
+                self.vamping_finished_event.clear()
+                self.executor.submit(self.vamp_thread, user_input)
+            
+            # Await the DM response
+            chatGPT_response = self.chat_session.append_user_input_and_get_response(user_input)
+            
+            # Start generating the image
+            image_future = self.chat_session.generate_image(chatGPT_response)
+            
+            # Start generating the DM response audio
+            narration_future = self.chat_session.generate_narration(chatGPT_response)
 
-        # Await the image and DM response audio generation
-        futures.wait([image_future, narration_future])
+            # Await the image and DM response audio generation
+            futures.wait([image_future, narration_future])
 
-        # Wait for the vamping audio to finish playing
-        if(vamp):
-            self.vamping_finished_event.wait()
+            # Wait for the vamping audio to finish playing
+            if(vamp):
+                self.vamping_finished_event.wait()
 
-        # Return the scene object
-        return Scene(chatGPT_response,
-                     audio_files.TAVERN_MUSIC,
-                     narration_future.result(),
-                     image_future.result(),
-                     sfx = audio_files.CHATTER)
+            # Return the scene object
+            return Scene(chatGPT_response,
+                        audio_files.TAVERN_MUSIC,
+                        narration_future.result(),
+                        image_future.result(),
+                        sfx = audio_files.CHATTER)
+        except Exception as e:
+            print(f"An error occurred while generating the scene")
+            traceback.print_exc()
+            raise(e)
     
     def vamp_thread(self, user_input):
         # Generate the vamping response and audio
