@@ -76,9 +76,44 @@ TODO
 			Generate image and audio
 			Wait
 			While waiting play the vamping audio
-			Once generated and vamping is done, call the
-
-
+			Once generated and vamping is done, call the display function
+	Button and text disabling/enabling
+		When skip is pressed, set button to "send" and enable it and text
+		When send is pressed, send text to window, disable button and text
+		When scene is ready and being played, set button to skip and enabled (leave text disabled)
+	TODO
+		Button enabling/disabling
+		Intial scene (as opposed to title scene) should start generating right away, then wait for audio to finish or skip, then play
+		Create an event listener for when the audio stops playing or is skipped, for the initial scene to not start until audio is done playing, and subsequent scenes to unlock the send and text field once audio is done playing.
+12/12 Notes:
+	DEBUG
+		text field is enabled when skip is showing, only in the initial scene
+		first skip should disable button until ready
+		vamping seems to draw from the future scene
+	TODO
+		stop title music
+		audio plays before the mainloop so photo is delayed?
+		play music and sfx on loop
+		skip should not immediately convert to send on the title screen
+		try catches everywhere
+		-
+		make view not protocol
+		Save the image file locally
+		Save the audio files locally
+		Handle temp audio file deletion (can delete anything in temp periodically)
+		Handle temp image file deletion
+		clean up threads
+		Clean up chatsession file to take out all the openai stuff
+		null checks everywhere
+		organize
+		audio manager class? for state machine and tokens etc
+		handle inappropriate content flags from chatgpt
+		handle case of skip button being pressed before narration starts
+		DEBUG mode to pass in fake images and narration
+		logger
+		take enter key to submit 
+		vamping is slow
+		TODOs
 
 Competitors:
 	Character AI

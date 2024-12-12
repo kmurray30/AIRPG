@@ -4,6 +4,11 @@
 class audio_files:
     TITLE = "assets/Title-14.wav"
     INTRO_NARRATION = "assets/intro_narration.wav"
+    TAVERN_MUSIC = "assets/Tavern-20.wav"
+    CHATTER = "assets/Chatter-12.wav"
+
+class image_files:
+    TITLE_SCREEN = "assets/title_screen.png"
 
 class colors:
     GRAY_CHATEAU = "#ABB2B9"
@@ -20,3 +25,6 @@ class art_styles:
     REALISTIC_OFFICE = "realistic office"
     ANIMATED_SHOW = "animated tv show"
     STUDIO_GHIBLI = "studio ghibli"
+
+class flags:
+    DEBUG = False

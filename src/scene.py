@@ -2,14 +2,16 @@
 class Scene:
     chatGPT_response: str
     music_path: str
+    sfx: str
     narration_path: str
     image_path: str
 
-    def __init__(self, chatGPT_response: str, music_path: str, narration_path: str, image_path: str):
+    def __init__(self, chatGPT_response: str, music_path: str, narration_path: str, image_path: str, sfx=None):
         self.chatGPT_response = chatGPT_response
         self.music_path = music_path
         self.narration_path = narration_path
         self.image_path = image_path
+        self.sfx = sfx
     
     # Getters
     def get_chatGPT_response(self) -> str:
@@ -23,6 +25,12 @@ class Scene:
     
     def get_image_path(self) -> str:
         return self.image_path
+    
+    def get_sfx_path(self) -> str:
+        return self.sfx
+    
+    def has_sfx(self) -> bool:
+        return self.sfx is not None
     
     # Truncate the message if it exceeds the max length, rounding down to the nearest word
     def truncate_message(self, message: str, max_length: int) -> str:

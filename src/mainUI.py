@@ -140,7 +140,7 @@ def save_image_from_url(url, file_path):
 def submit_prompt_and_narrate_task(user_prompt, summary_future):
     # Call ChatGPT
     gtp_scene_description = ChatBot.call_openai_and_update_chat_messages(user_prompt, chatGptMessages)
-     
+    
     # Generate the image from the scene description (non-blocking)
     if DEBUG:
         image_url_future = Future()
